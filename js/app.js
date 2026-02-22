@@ -44,12 +44,15 @@
     if (!heroBgWrap) return;
     variants.forEach((variant, i) => {
       const v = document.createElement('video');
-      v.className = 'hero-video';
+      v.className = 'hero-video hidden'; // Start hidden
       v.setAttribute('muted', '');
       v.setAttribute('playsinline', '');
-      v.setAttribute('preload', 'auto');
+      v.setAttribute('preload', i === 0 ? 'auto' : 'none'); // Only preload first video
       v.setAttribute('loop', '');
-      if (variant.videoSrc) v.src = variant.videoSrc;
+      // Only set src for the first video initially, others will lazy load
+      if (i === 0 && variant.videoSrc) {
+        v.src = variant.videoSrc;
+      }
       heroBgWrap.appendChild(v);
       heroVideos.push(v);
     });
@@ -134,6 +137,12 @@
 
     heroVideos.forEach((video, i) => {
       if (i === currentVariantIndex) {
+        // Efficient lazy loading: Load source only when needed
+        if (!video.src && CONFIG.variants[i].videoSrc) {
+          video.src = CONFIG.variants[i].videoSrc;
+          video.load();
+        }
+
         video.classList.add('active');
         video.classList.remove('hidden');
         const dur = video.duration;
@@ -308,7 +317,7 @@
     document.documentElement.style.setProperty('--hero-scroll-range', maxScrollForHero + 'px');
   }
 
-  /** โหลดวิดีโอทั้งสอง variant แล้วซ่อน loading */
+  /** โหลดวิดีโอตัวแรกก่อน แล้วซ่อน loading (ตัวอื่นจะ lazy load ตาม scroll) */
   function loadVideos() {
     const variants = CONFIG.variants;
     if (!variants.length || !variants[0].videoSrc) {
@@ -318,40 +327,45 @@
       return;
     }
 
-    loadingBar.style.width = '10%';
-    loadingText.textContent = 'Loading video...';
+    loadingBar.style.width = '30%';
+    loadingText.textContent = 'Preparing Radiance...';
 
-    const promises = heroVideos.slice(0, variants.length).map((video, i) => {
-      const src = variants[i].videoSrc;
-      if (!src) return Promise.resolve();
-      video.src = src;
-      video.load();
-      return new Promise((resolve) => {
-        video.addEventListener('canplay', () => resolve(), { once: true });
-        video.addEventListener('error', () => resolve(), { once: true });
-      });
+    // We only wait for the FIRST video to be ready for better UX/Bandwidth
+    const firstVideo = heroVideos[0];
+    const firstVariant = variants[0];
+
+    // Ensure first video has src
+    if (!firstVideo.src) firstVideo.src = firstVariant.videoSrc;
+    firstVideo.load();
+
+    const checkReady = new Promise((resolve) => {
+      // If already ready
+      if (firstVideo.readyState >= 3) resolve();
+
+      firstVideo.oncanplay = () => resolve();
+      firstVideo.onerror = () => resolve(); // Prevent hang on error
+
+      // Fallback timeout
+      setTimeout(resolve, 3000);
     });
 
-    Promise.all(promises).then(() => {
+    checkReady.then(() => {
       loadingBar.style.width = '100%';
       loadingText.textContent = 'Ready';
-      const first = variants[0];
-      setVariantContent(first);
-      document.documentElement.style.setProperty('--theme-color', first.themeColor || CONFIG.themeColor);
-      heroVideos.forEach((video, i) => {
-        if (i === 0) {
-          video.classList.add('active');
-          video.classList.remove('hidden');
-        } else {
-          video.classList.add('hidden');
-          video.classList.remove('active');
-        }
-      });
-      loadingOverlay.classList.add('loaded');
+
+      setVariantContent(firstVariant);
+      document.documentElement.style.setProperty('--theme-color', firstVariant.themeColor || CONFIG.themeColor);
+
+      firstVideo.classList.add('active');
+      firstVideo.classList.remove('hidden');
+
       setTimeout(() => {
-        loadingOverlay.classList.add('hidden');
-        recalcHeroScroll();
-      }, 300);
+        loadingOverlay.classList.add('loaded');
+        setTimeout(() => {
+          loadingOverlay.classList.add('hidden');
+          recalcHeroScroll();
+        }, 400);
+      }, 200);
     });
   }
 
