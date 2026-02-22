@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLIPOP – Multi-Screen Launcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            min-height: 100vh;
+            background: #06060f;
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .tagline {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.35);
+            letter-spacing: 0.06em;
+            margin-bottom: 40px;
+        }
+
+        /* HOW TO */
+        .how-to {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 32px;
+            max-width: 540px;
+            width: 100%;
+        }
+
+        .how-title {
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .how-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .how-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.55);
+            line-height: 1.5;
+        }
+
+        .how-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(96, 165, 250, 0.15);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            color: #60a5fa;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .note {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: rgba(96, 165, 250, 0.06);
+            border-radius: 8px;
+            border-left: 2px solid rgba(96, 165, 250, 0.4);
+            font-size: 11px;
+            color: rgba(96, 165, 250, 0.7);
+            line-height: 1.6;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            max-width: 540px;
+            width: 100%;
+        }
+
+        .card {
+            border-radius: 14px;
+            border: 1.5px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: all .2s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:active {
+            transform: translateY(0);
+        }
+
+        .card-ipad {
+            border-color: rgba(96, 165, 250, 0.25);
+        }
+
+        .card-ipad::before {
+            background: radial-gradient(circle at 50% 0%, rgba(96, 165, 250, 0.07), transparent 60%);
+        }
+
+        .card-ipad:hover {
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 8px 32px rgba(96, 165, 250, 0.1);
+        }
+
+        .card-video::before {
+            background: radial-gradient(circle at 50% 0%, rgba(192, 132, 252, 0.07), transparent 60%);
+        }
+
+        .card-video:hover {
+            border-color: rgba(192, 132, 252, 0.3);
+            box-shadow: 0 8px 32px rgba(192, 132, 252, 0.08);
+        }
+
+        .card-nutrition::before {
+            background: radial-gradient(circle at 50% 0%, rgba(74, 222, 128, 0.07), transparent 60%);
+        }
+
+        .card-nutrition:hover {
+            border-color: rgba(74, 222, 128, 0.3);
+            box-shadow: 0 8px 32px rgba(74, 222, 128, 0.08);
+        }
+
+        .card-order::before {
+            background: radial-gradient(circle at 50% 0%, rgba(251, 146, 60, 0.07), transparent 60%);
+        }
+
+        .card-order:hover {
+            border-color: rgba(251, 146, 60, 0.3);
+            box-shadow: 0 8px 32px rgba(251, 146, 60, 0.08);
+        }
+
+        .card-icon {
+            font-size: 28px;
+        }
+
+        .card-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.5;
+        }
+
+        .card-tag {
+            font-size: 10px;
+            border-radius: 20px;
+            border: 1px solid;
+            padding: 2px 10px;
+            display: inline-block;
+            letter-spacing: 0.06em;
+            align-self: flex-start;
+        }
+
+        .tag-blue {
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.35);
+        }
+
+        .tag-purple {
+            color: #c084fc;
+            border-color: rgba(192, 132, 252, 0.35);
+        }
+
+        .tag-green {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.35);
+        }
+
+        .tag-orange {
+            color: #fb923c;
+            border-color: rgba(251, 146, 60, 0.35);
+        }
+
+        /* OPEN ALL BTN */
+        .open-all-btn {
+            margin-top: 20px;
+            padding: 14px 32px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #60a5fa, #c084fc);
+            border: none;
+            color: #000;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            letter-spacing: 0.06em;
+            transition: all .2s;
+            box-shadow: 0 8px 32px rgba(96, 165, 250, 0.2);
+        }
+
+        .open-all-btn:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+
+        .open-all-btn:active {
+            transform: scale(0.98);
+        }
+
+        .footer {
+            margin-top: 32px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="logo">OLIPOP</div>
+    <div class="tagline">Multi-Screen Display System — BroadcastChannel</div>
+
+    <!-- HOW TO -->
+    <div class="how-to">
+        <div class="how-title">วิธีใช้งาน</div>
+        <div class="how-steps">
+            <div class="how-step">
+                <div class="how-num">1</div>
+                <div>เปิดเซิร์ฟเวอร์ผ่าน Live Server (VS Code) ที่ <strong>localhost:5500</strong></div>
+            </div>
+            <div class="how-step">
+                <div class="how-num">2</div>
+                <div>กดปุ่ม <strong>"เปิดทุกจอพร้อมกัน"</strong> หรือเปิดแต่ละการ์ดเอง แล้ว Drag ไปแต่ละจอ</div>
+            </div>
+            <div class="how-step">
+                <div class="how-num">3</div>
+                <div>เลือกสินค้าบนหน้า iPad → ทุกจออัพเดตทันทีผ่าน BroadcastChannel</div>
+            </div>
+        </div>
+        <div class="note">
+            ⚠️ ทุกหน้าต้องเปิดจาก <strong>domain เดียวกัน</strong> (localhost:5500) BroadcastChannel จึงทำงานได้
+        </div>
+    </div>
+
+    <!-- SCREEN CARDS -->
+    <div class="cards">
+        <a href="ipad.html" target="_blank" class="card card-ipad">
+            <div class="card-icon">📱</div>
+            <div class="card-name">iPad – Menu</div>
+            <div class="card-desc">หน้ารายการสินค้า ลูกค้าเลือกได้จากหน้านี้</div>
+            <span class="card-tag tag-blue">Controller</span>
+        </a>
+        <a href="screen-video.html" target="_blank" class="card card-video">
+            <div class="card-icon">📺</div>
+            <div class="card-name">จอวิดีโอ</div>
+            <div class="card-desc">เล่นวิดีโอสินค้า fullscreen ตามที่เลือก</div>
+            <span class="card-tag tag-purple">Screen 1</span>
+        </a>
+        <a href="screen-nutrition.html" target="_blank" class="card card-nutrition">
+            <div class="card-icon">🥗</div>
+            <div class="card-name">โภชนาการ · Story</div>
+            <div class="card-desc">ข้อมูลโภชนาการ ส่วนผสม และเรื่องราวสินค้า</div>
+            <span class="card-tag tag-green">Screen 2</span>
+        </a>
+        <a href="screen-order.html" target="_blank" class="card card-order">
+            <div class="card-icon">🛒</div>
+            <div class="card-name">ราคา · สั่งซื้อ</div>
+            <div class="card-desc">แสดงราคาและปุ่มสั่งซื้อสินค้าที่เลือก</div>
+            <span class="card-tag tag-orange">Screen 3</span>
+        </a>
+    </div>
+
+    <button class="open-all-btn" onclick="openAll()">🚀 เปิดทุกจอพร้อมกัน</button>
+
+    <div class="footer">OLIPOP Multi-Display — BroadcastChannel API</div>
+
+    <script>
+        function openAll() {
+            window.open('ipad.html', '_blank');
+            setTimeout(() => window.open('screen-video.html', '_blank'), 200);
+            setTimeout(() => window.open('screen-nutrition.html', '_blank'), 400);
+            setTimeout(() => window.open('screen-order.html', '_blank'), 600);
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLIPOP – Video Display</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            background: #050508;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* VIDEO */
+        #main-video {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity .7s ease;
+        }
+
+        #main-video.ready {
+            opacity: 1;
+        }
+
+        /* PLACEHOLDER */
+        #placeholder {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            background: linear-gradient(135deg, #0a0a1e 0%, #0d0d2a 100%);
+            transition: opacity .5s;
+            z-index: 1;
+        }
+
+        #placeholder.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .ph-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(32px, 8vw, 80px);
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            background: linear-gradient(135deg, #fff 0%, #666 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .ph-sub {
+            font-size: clamp(12px, 2vw, 18px);
+            color: rgba(255, 255, 255, 0.25);
+            letter-spacing: 0.08em;
+        }
+
+        .ph-pulse {
+            width: 50px;
+            height: 3px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #60a5fa, #c084fc);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scaleX(1);
+                opacity: .7
+            }
+
+            50% {
+                transform: scaleX(.4);
+                opacity: .3
+            }
+        }
+
+        /* GRADIENT OVERLAY */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 50%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* PRODUCT INFO */
+        #product-info {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: clamp(20px, 4vw, 48px);
+            z-index: 3;
+            transition: all .4s ease;
+        }
+
+        .product-index {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(11px, 2vw, 16px);
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 8px;
+        }
+
+        .product-name {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(36px, 9vw, 110px);
+            font-weight: 800;
+            line-height: 0.95;
+            color: #fff;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.01em;
+        }
+
+        .product-sub {
+            font-size: clamp(13px, 2vw, 20px);
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: 10px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        /* TOP BADGE */
+        #top-badge {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 0.06em;
+            z-index: 4;
+            backdrop-filter: blur(8px);
+        }
+
+        /* LOADER */
+        #loader {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        #loader.show {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* HUD / SCAN EFFECTS */
+        .hud-fx {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0.12;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+        }
+
+        .vignette-fx {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 11;
+            background: radial-gradient(circle, transparent 30%, rgba(0, 0, 0, 0.8) 100%);
+        }
+
+        /* Transition Overlay for Video Switch */
+        #switch-flash {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HUD Effects -->
+    <div class="hud-fx"></div>
+    <div class="vignette-fx"></div>
+    <div id="switch-flash"></div>
+
+    <!-- Video -->
+    <video id="main-video" muted playsinline loop></video>
+
+    <!-- Placeholder -->
+    <div id="placeholder">
+        <div class="ph-logo">OLIPOP</div>
+        <div class="ph-sub">รอการเลือกสินค้าจาก iPad</div>
+        <div class="ph-pulse"></div>
+    </div>
+
+    <!-- Overlay -->
+    <div id="overlay"></div>
+
+    <!-- Product Info -->
+    <div id="product-info" style="opacity:0">
+        <div class="product-index" id="p-index">— 01</div>
+        <div class="product-name" id="p-name">CHERRY</div>
+        <div class="product-sub" id="p-sub">Soda</div>
+    </div>
+
+    <!-- Top Badge -->
+    <div id="top-badge">📺 จอวิดีโอ — OLIPOP</div>
+
+    <!-- Loader -->
+    <div id="loader"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="channel.js"></script>
+    <script>
+        const video = document.getElementById('main-video');
+        const placeholder = document.getElementById('placeholder');
+        const loader = document.getElementById('loader');
+        const info = document.getElementById('product-info');
+
+        function showProduct(p) {
+            if (!p) return;
+
+            // Flash effect on switch
+            const flash = document.getElementById('switch-flash');
+            flash.style.opacity = '0.15';
+            setTimeout(() => flash.style.opacity = '0', 300);
+
+            // Text
+            document.getElementById('p-index').textContent = `— ${String(p.index + 1).padStart(2, '0')}`;
+            document.getElementById('p-name').textContent = p.name.toUpperCase();
+            document.getElementById('p-sub').textContent = p.subtitle;
+
+            info.style.opacity = '0';
+            setTimeout(() => info.style.opacity = '1', 400);
+
+            // Video
+            if (p.videoSrc) {
+                placeholder.classList.add('hidden');
+                loader.classList.add('show');
+                video.classList.remove('ready');
+
+                // อย่าโหลดซ้ำไฟล์เดิม
+                const newSrc = '../' + p.videoSrc;
+                if (video.src.includes(p.videoSrc)) {
+                    loader.classList.remove('show');
+                    video.classList.add('ready');
+                    return;
+                }
+
+                video.src = newSrc;
+                video.load();
+                video.oncanplay = () => {
+                    loader.classList.remove('show');
+                    video.classList.add('ready');
+                    video.play().catch(() => { });
+                };
+                video.onerror = () => {
+                    loader.classList.remove('show');
+                    placeholder.classList.remove('hidden');
+                };
+            } else {
+                placeholder.classList.remove('hidden');
+                video.src = '';
+                video.classList.remove('ready');
+            }
+        }
+
+        // รับ event จาก iPad
+        onProductSelect(showProduct);
+    </script>
+</body>
+
+</html>

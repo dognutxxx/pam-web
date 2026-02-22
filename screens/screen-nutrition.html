@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLIPOP – Nutrition & Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: #06060f;
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            transition: background 1s ease;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 0% 0%, var(--glow, rgba(96, 165, 250, 0.15)) 0%, transparent 50%);
+            opacity: 0.4;
+            pointer-events: none;
+            transition: background 1s ease;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HEADER ── */
+        .screen-header {
+            padding: 20px 28px 14px;
+            background: linear-gradient(160deg, #0a1a1a 0%, #060f14 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-shrink: 0;
+        }
+
+        .screen-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .screen-badge {
+            font-size: 10px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(74, 222, 128, 0.35);
+            color: #4ade80;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── CONTENT ── */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+        }
+
+        /* ── PRODUCT TITLE ── */
+        .product-title-area {
+            transition: all .4s;
+        }
+
+        .product-icon {
+            font-size: clamp(32px, 5vw, 52px);
+            margin-bottom: 10px;
+        }
+
+        .product-name {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(22px, 4vw, 42px);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .product-sub {
+            font-size: clamp(11px, 1.5vw, 15px);
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+
+        /* ── NUTRITION ── */
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nut-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .nut-card {
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            transition: all .3s;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .visible .nut-card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .nut-card:nth-child(1) {
+            transition-delay: 0.1s;
+        }
+
+        .nut-card:nth-child(2) {
+            transition-delay: 0.2s;
+        }
+
+        .nut-card:nth-child(3) {
+            transition-delay: 0.3s;
+        }
+
+        .nut-card:nth-child(4) {
+            transition-delay: 0.4s;
+        }
+
+        .nut-card:hover {
+            border-color: rgba(74, 222, 128, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nut-label {
+            font-size: clamp(10px, 1.2vw, 12px);
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 4px;
+        }
+
+        .nut-val {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(18px, 3vw, 28px);
+            font-weight: 700;
+            color: #4ade80;
+        }
+
+        .nut-unit {
+            font-size: clamp(9px, 1vw, 11px);
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 2px;
+        }
+
+        /* ── DESCRIPTION ── */
+        .desc-text {
+            font-size: clamp(11px, 1.5vw, 14px);
+            line-height: 1.75;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        /* ── INGREDIENTS ── */
+        .ingr-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .ingr-chip {
+            font-size: clamp(10px, 1.2vw, 12px);
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all .3s;
+        }
+
+        .ingr-chip.main {
+            background: rgba(251, 146, 60, 0.1);
+            border-color: rgba(251, 146, 60, 0.3);
+            color: #fb923c;
+            font-weight: 600;
+        }
+
+        /* ── WAITING STATE ── */
+        .waiting {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            opacity: 0.35;
+        }
+
+        .waiting-icon {
+            font-size: 40px;
+        }
+
+        .waiting-text {
+            font-size: 13px;
+            letter-spacing: 0.06em;
+        }
+
+        .waiting-pulse {
+            width: 40px;
+            height: 3px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #4ade80, #60a5fa);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scaleX(1)
+            }
+
+            50% {
+                transform: scaleX(.4)
+            }
+        }
+
+        /* Transition */
+        #product-section {
+            opacity: 0;
+            transition: opacity .4s;
+        }
+
+        #product-section.visible {
+            opacity: 1;
+        }
+
+        #waiting-section {
+            transition: opacity .4s;
+        }
+
+        #waiting-section.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 10px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.15);
+            text-align: center;
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="screen-header">
+        <span class="screen-logo">OLIPOP</span>
+        <span class="screen-badge">🥗 Nutrition · Story</span>
+    </div>
+
+    <div class="content">
+        <!-- WAITING -->
+        <div class="waiting" id="waiting-section">
+            <div class="waiting-icon">🥗</div>
+            <div class="waiting-text">รอการเลือกสินค้าจาก iPad</div>
+            <div class="waiting-pulse"></div>
+        </div>
+
+        <!-- PRODUCT CONTENT -->
+        <div id="product-section" style="display:none">
+            <!-- Title -->
+            <div class="product-title-area">
+                <div class="product-icon" id="p-icon">🍒</div>
+                <div class="product-name" id="p-name">—</div>
+                <div class="product-sub" id="p-sub">—</div>
+            </div>
+
+            <!-- Nutrition -->
+            <div>
+                <div class="section-label">โภชนาการ</div>
+                <div class="nut-grid">
+                    <div class="nut-card">
+                        <div class="nut-label">แคลอรี่</div>
+                        <div class="nut-val" id="n-cal">—</div>
+                        <div class="nut-unit">kcal</div>
+                    </div>
+                    <div class="nut-card">
+                        <div class="nut-label">น้ำตาล</div>
+                        <div class="nut-val" id="n-sugar">—</div>
+                        <div class="nut-unit">per can</div>
+                    </div>
+                    <div class="nut-card">
+                        <div class="nut-label">ใยอาหาร</div>
+                        <div class="nut-val" id="n-fiber">—</div>
+                        <div class="nut-unit">per can</div>
+                    </div>
+                    <div class="nut-card">
+                        <div class="nut-label">โปรตีน</div>
+                        <div class="nut-val" id="n-protein">—</div>
+                        <div class="nut-unit">per can</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <div class="section-label">เรื่องราวสินค้า</div>
+                <p class="desc-text" id="p-desc">—</p>
+            </div>
+
+            <!-- Ingredients -->
+            <div>
+                <div class="section-label">ส่วนผสมหลัก</div>
+                <div class="ingr-chips" id="ingr-chips"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">🥗 Nutrition & Story Screen — OLIPOP Multi-Display</div>
+
+    <script src="../js/config.js"></script>
+    <script src="channel.js"></script>
+    <script>
+        function showProduct(p) {
+            if (!p) return;
+
+            // Update color theme
+            document.body.style.setProperty('--glow', p.glowColor + '22'); // add transparency
+
+            // Show product section
+            document.getElementById('waiting-section').classList.add('hidden');
+            const sec = document.getElementById('product-section');
+            sec.style.display = 'flex';
+            sec.style.flexDirection = 'column';
+            sec.style.gap = '24px';
+
+            // Trigger animations
+            sec.classList.remove('visible');
+            void sec.offsetWidth; // force reflow
+            sec.classList.add('visible');
+
+            // Fill content
+            document.getElementById('p-icon').textContent = p.icon || '🥤';
+            document.getElementById('p-name').textContent = p.name;
+            document.getElementById('p-sub').textContent = p.subtitle;
+            document.getElementById('n-cal').textContent = p.calories ?? '—';
+            document.getElementById('n-sugar').textContent = p.sugar ?? '—';
+            document.getElementById('n-fiber').textContent = p.fiber ?? '—';
+            document.getElementById('n-protein').textContent = p.protein ?? '—';
+            document.getElementById('p-desc').textContent = p.description;
+
+            const chips = document.getElementById('ingr-chips');
+            chips.innerHTML = (p.ingredients || []).map((ing, i) =>
+                `<span class="ingr-chip ${i === 0 ? 'main' : ''}">${ing}</span>`
+            ).join('');
+        }
+
+        onProductSelect(showProduct);
+    </script>
+</body>
+
+</html>

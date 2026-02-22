@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLIPOP – iPad Menu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0a0a12;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #60a5fa;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            background: linear-gradient(160deg, #13132e 0%, #0c0c20 100%);
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .header-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 0.14em;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .header-status {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 6px #4ade80;
+            animation: blink 2s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        /* ── SELECTED BAR ── */
+        .selected-bar {
+            padding: 10px 20px;
+            background: rgba(96, 165, 250, 0.06);
+            border-bottom: 1px solid rgba(96, 165, 250, 0.12);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color .3s;
+        }
+
+        .selected-bar span {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        /* ── MENU LIST ── */
+        .menu-list {
+            overflow-y: auto;
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all .2s;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item:active {
+            transform: scale(0.98);
+        }
+
+        .menu-item.active {
+            background: rgba(96, 165, 250, 0.1);
+            border-color: rgba(96, 165, 250, 0.4);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.06);
+        }
+
+        .menu-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.04);
+            transition: transform .2s;
+        }
+
+        .menu-item.active .menu-icon {
+            transform: scale(1.1);
+        }
+
+        .menu-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .menu-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+        }
+
+        .menu-arrow {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.15);
+            transition: color .2s, transform .2s;
+        }
+
+        .menu-item.active .menu-arrow {
+            color: #60a5fa;
+            transform: translateX(3px);
+        }
+
+        /* ── LAYOUT ── */
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .body-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            padding: 12px 20px;
+            background: #0c0c1a;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.2);
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── TOAST ── */
+        #toast {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            background: rgba(15, 15, 25, 0.95);
+            border: 1px solid rgba(96, 165, 250, 0.35);
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 12px;
+            color: #60a5fa;
+            opacity: 0;
+            transition: opacity .3s, transform .3s;
+            pointer-events: none;
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ── KIOSK EFFECTS ── */
+        .kiosk-effects {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .scanlines {
+            inset: 0;
+            position: absolute;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 3px, 3px 100%;
+            opacity: 0.15;
+        }
+
+        .vignette {
+            inset: 0;
+            position: absolute;
+            background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+        }
+
+        /* ── SYNCING OVERLAY ── */
+        #sync-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 18, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .4s ease;
+        }
+
+        #sync-overlay.show {
+            opacity: 1;
+        }
+
+        .sync-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+            animation: rotate-sync 1.5s linear infinite;
+        }
+
+        @keyframes rotate-sync {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .sync-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #60a5fa;
+        }
+
+        .sync-sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HUD Effects -->
+    <div class="kiosk-effects">
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+    </div>
+
+    <!-- Sync Overlay -->
+    <div id="sync-overlay">
+        <div class="sync-icon">🔄</div>
+        <div class="sync-text">SYNCING STATES</div>
+        <div class="sync-sub">Broadcasting to multi-display system...</div>
+    </div>
+    <div class="header">
+        <div class="header-logo">OLIPOP</div>
+        <div class="header-sub">เลือกเครื่องดื่มที่ต้องการ</div>
+        <div class="header-status">
+            <div class="status-dot"></div>
+            <span>เชื่อมต่อกับ 3 จอ — กรุณาเปิด screen-video / nutrition / order ด้วย</span>
+        </div>
+    </div>
+
+    <div class="selected-bar" id="selected-bar">
+        กำลังรอการเลือก...
+    </div>
+
+    <div class="body-wrap">
+        <div class="menu-list" id="menu-list"></div>
+    </div>
+
+    <div class="footer">📱 iPad Customer Screen — OLIPOP Multi-Display System</div>
+    <div id="toast"></div>
+
+    <script src="../js/config.js"></script>
+    <script src="channel.js"></script>
+    <script>
+        /* ── Product Data ── */
+        const ICONS = ['🍒', '🥭', '🍫', '🍦', '🍓', '🍵', '☕', '🍋', '🍑', '🫐'];
+        const PRICES = [89, 89, 129, 129, 99, 109, 119, 89, 99, 109];
+        const CALORIES = [35, 40, 180, 175, 45, 55, 120, 30, 40, 50];
+        const SUGARS = ['3g', '4g', '8g', '6g', '5g', '3g', '2g', '0g', '4g', '5g'];
+        const FIBERS = ['9g', '9g', '2g', '2g', '8g', '6g', '1g', '10g', '7g', '8g'];
+        const PROTEINS = ['0g', '0g', '30g', '28g', '1g', '2g', '2g', '0g', '0g', '1g'];
+        const GLOWS = ['#ef4444', '#f59e0b', '#92400e', '#fef08a', '#ec4899', '#22c55e', '#78350f', '#eab308', '#f9a8d4', '#7c3aed'];
+        const INGREDIENTS = [
+            ['Cherry Juice', 'Prebiotics', 'Plant Fiber', 'Stevia', 'Citric Acid'],
+            ['Mango Puree', 'Prebiotics', 'Plant Fiber', 'Stevia', 'Natural Flavor'],
+            ['Cocoa', 'Whey Protein', 'Milk', 'Stevia', 'Vitamin D'],
+            ['Vanilla Extract', 'Whey Protein', 'Milk', 'Stevia', 'Calcium'],
+            ['Strawberry Puree', 'Prebiotics', 'Plant Fiber', 'Stevia', 'Vitamin C'],
+            ['Matcha Powder', 'Oat Milk', 'Honey', 'L-Theanine', 'Antioxidants'],
+            ['Cold Brew Coffee', 'Nitrogen', 'Oat Milk', 'MCT Oil', 'Magnesium'],
+            ['Lemon Juice', 'Electrolytes', 'Plant Fiber', 'Stevia', 'Zinc'],
+            ['White Tea', 'Peach Extract', 'Hyaluronic Acid', 'Collagen', 'Biotin'],
+            ['Blueberry', 'Acai', 'Elderberry', 'Vitamin C', 'Resveratrol'],
+        ];
+
+        const PRODUCTS = CONFIG.variants.map((v, i) => ({
+            ...v,
+            icon: ICONS[i] || '🥤',
+            price: PRICES[i] || 99,
+            calories: CALORIES[i] || 40,
+            sugar: SUGARS[i] || '—',
+            fiber: FIBERS[i] || '—',
+            protein: PROTEINS[i] || '—',
+            glowColor: GLOWS[i] || '#60a5fa',
+            ingredients: INGREDIENTS[i] || [],
+        }));
+
+        /* ── Render Menu ── */
+        let activeIndex = -1;
+
+        function renderMenu() {
+            const list = document.getElementById('menu-list');
+            list.innerHTML = '';
+            PRODUCTS.forEach((p, i) => {
+                const el = document.createElement('div');
+                el.className = 'menu-item';
+                el.id = `item-${i}`;
+                el.innerHTML = `
+          <div class="menu-icon">${p.icon}</div>
+          <div class="menu-info">
+            <div class="menu-name">${p.name}</div>
+            <div class="menu-sub">${p.subtitle}</div>
+          </div>
+          <div class="menu-arrow">›</div>
+        `;
+                el.addEventListener('click', () => selectProduct(i));
+                list.appendChild(el);
+            });
+        }
+
+        function selectProduct(index) {
+            const p = PRODUCTS[index];
+            if (!p) return;
+
+            // อย่ากดซ้ำตัวเดิมถ้ากำลังเปิดอยู่ (ยกเว้นตอนโหลดครั้งแรก)
+            if (activeIndex === index && document.getElementById(`item-${index}`).classList.contains('active')) return;
+
+            activeIndex = index;
+
+            // Highlight active
+            document.querySelectorAll('.menu-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+
+            // Update status bar
+            const bar = document.getElementById('selected-bar');
+            bar.innerHTML = `${p.icon} กำลังแสดง: <span>${p.name}</span> ในทุกจอ`;
+
+            // Broadcast ไปทุกจอ
+            broadcastProduct(p);
+            showToast(`✓ ส่ง "${p.name}" ไปยัง 3 จอแล้ว`);
+
+            // Visual feedback for syncing
+            const sync = document.getElementById('sync-overlay');
+            sync.classList.add('show');
+            setTimeout(() => sync.classList.remove('show'), 600);
+        }
+
+        /* ── Toast ── */
+        let toastTimer;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        /* ── Init State ── */
+        function init() {
+            renderMenu();
+
+            // ตรวจสอบสถานะล่าสุดจาก localStorage
+            const lastSelected = localStorage.getItem('olipop_last_selected');
+            if (lastSelected) {
+                try {
+                    const product = JSON.parse(lastSelected);
+                    const index = PRODUCTS.findIndex(p => p.index === product.index);
+                    if (index !== -1) {
+                        activeIndex = index;
+                        document.getElementById(`item-${index}`).classList.add('active');
+                        const bar = document.getElementById('selected-bar');
+                        bar.innerHTML = `${product.icon} กำลังแสดง: <span>${product.name}</span> ในทุกจอ`;
+                    }
+                } catch (e) { }
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

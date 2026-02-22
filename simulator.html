@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLIPOP – 6-Screen Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --surface2: #1a1a1a;
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #ff6b35;
+            --accent2: #ffbe0b;
+            --text: #f0f0f0;
+            --text-muted: rgba(240, 240, 240, 0.45);
+            --radius: 12px;
+            --screen-radius: 18px;
+            --ipad-color: #1e1e2e;
+            --bezel: 14px;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        /* ============ TOP BAR ============ */
+        .topbar {
+            height: 52px;
+            background: #0d0d0d;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .topbar-logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 0.12em;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .topbar-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--surface2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            letter-spacing: 0.06em;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-ipad {
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
+            background: rgba(96, 165, 250, 0.08);
+        }
+
+        .badge-screen {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.3);
+            background: rgba(74, 222, 128, 0.08);
+        }
+
+        .topbar-help {
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: color .2s;
+        }
+
+        .topbar-help:hover {
+            color: var(--text);
+        }
+
+        /* ============ MAIN GRID ============ */
+        .simulator-wrap {
+            height: calc(100vh - 52px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            gap: 0;
+        }
+
+        /* 6 Screens: 3 left column | iPad center | 2 right column */
+        .screen-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.55fr 1fr;
+            grid-template-rows: 1fr 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            height: 100%;
+            max-width: 1600px;
+            max-height: 860px;
+        }
+
+        /* Left column: screens 1,2,3 */
+        .screen-slot-1 {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .screen-slot-2 {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .screen-slot-3 {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        /* Center: iPad (spans all 3 rows) */
+        .screen-slot-ipad {
+            grid-column: 2;
+            grid-row: 1 / 4;
+        }
+
+        /* Right column: screens 4,5 (2 screens, centered) */
+        .screen-slot-4 {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        .screen-slot-5 {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .screen-slot-6 {
+            grid-column: 3;
+            grid-row: 3;
+        }
+
+        /* ============ SCREEN BASE ============ */
+        .screen {
+            border-radius: var(--screen-radius);
+            border: 1.5px solid var(--border);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: border-color .3s;
+        }
+
+        .screen:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        /* Screen label */
+        .screen-label {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            z-index: 10;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        /* ============ iPAD DEVICE ============ */
+        .ipad-outer {
+            background: #1c1c28;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            padding: var(--bezel);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            box-shadow: 0 0 60px rgba(96, 165, 250, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .ipad-camera {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #2a2a3a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 0 auto 8px;
+        }
+
+        .ipad-screen {
+            flex: 1;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #0a0a12;
+            position: relative;
+        }
+
+        .ipad-home {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #2a2a38;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 8px auto 0;
+        }
+
+        .screen-slot-ipad .screen-label {
+            top: 20px;
+            left: 22px;
+        }
+
+        /* ============ MENU (iPad Content) ============ */
+        .menu-header {
+            background: linear-gradient(160deg, #12122a 0%, #0d0d1e 100%);
+            padding: 14px 16px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .menu-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: #fff;
+        }
+
+        .menu-subtitle {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+            letter-spacing: 0.06em;
+        }
+
+        .menu-list {
+            overflow-y: auto;
+            flex: 1;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            background: rgba(255, 255, 255, 0.03);
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background: rgba(96, 165, 250, 0.12);
+            border-color: rgba(96, 165, 250, 0.35);
+        }
+
+        .menu-item-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .menu-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .menu-item-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-item-sub {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 1px;
+        }
+
+        .menu-item-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(96, 165, 250, 0.6);
+            flex-shrink: 0;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .menu-item.active .menu-item-dot {
+            opacity: 1;
+        }
+
+        /* ============ SCREEN CONTENT PANELS ============ */
+        .panel {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Panel: Video Hero (Main Display) */
+        .panel-video {
+            background: #050508;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* วิดีโอจริง */
+        #main-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            transition: opacity .5s ease;
+        }
+
+        #main-video.ready {
+            opacity: 1;
+        }
+
+        /* Overlay ข้อความทับวิดีโอ */
+        .panel-video .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 55%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 16px;
+            z-index: 2;
+        }
+
+        .video-product-name {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(16px, 2.2vw, 28px);
+            font-weight: 800;
+            line-height: 1.1;
+            color: #fff;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .video-product-sub {
+            font-size: clamp(9px, 1.1vw, 12px);
+            color: rgba(255, 255, 255, 0.65);
+            margin-top: 4px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* Placeholder ก่อนเลือก */
+        .video-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #0d0d1e 0%, #12122a 100%);
+            z-index: 1;
+            transition: opacity .4s;
+        }
+
+        .video-placeholder.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .video-placeholder .ph-icon {
+            font-size: 32px;
+            opacity: 0.35;
+        }
+
+        .video-placeholder .ph-text {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.06em;
+        }
+
+        /* Spinning loader ตอนโหลดวิดีโอ */
+        .video-loader {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+
+        .video-loader.show {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Panel: Nutrition Info */
+        .panel-nutrition {
+            background: linear-gradient(160deg, #0a1a0a 0%, #0d1a0d 100%);
+            padding: 14px;
+            gap: 8px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .panel-h {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(12px, 1.4vw, 16px);
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .panel-tag {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid;
+            letter-spacing: 0.06em;
+        }
+
+        .tag-green {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.35);
+        }
+
+        .tag-blue {
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.35);
+        }
+
+        .tag-orange {
+            color: #fb923c;
+            border-color: rgba(251, 146, 60, 0.35);
+        }
+
+        .tag-purple {
+            color: #c084fc;
+            border-color: rgba(192, 132, 252, 0.35);
+        }
+
+        .nutrition-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .nut-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 7px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nut-label {
+            font-size: clamp(9px, 1vw, 11px);
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .nut-val {
+            font-size: clamp(10px, 1.1vw, 12px);
+            font-weight: 600;
+            color: #4ade80;
+        }
+
+        /* Panel: Ingredients */
+        .panel-ingredients {
+            background: linear-gradient(160deg, #1a0a0e 0%, #1a0d14 100%);
+            padding: 14px;
+        }
+
+        .ingr-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .ingr-chip {
+            font-size: clamp(9px, 1vw, 11px);
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all .25s;
+        }
+
+        .ingr-chip.highlight {
+            background: rgba(251, 146, 60, 0.1);
+            border-color: rgba(251, 146, 60, 0.3);
+            color: #fb923c;
+        }
+
+        /* Panel: Description / Story */
+        .panel-desc {
+            background: linear-gradient(160deg, #0e0a1a 0%, #120d1e 100%);
+            padding: 14px;
+        }
+
+        .panel-desc-text {
+            font-size: clamp(10px, 1.1vw, 13px);
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.65);
+            margin-top: 8px;
+        }
+
+        .panel-product-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: rgba(192, 132, 252, 0.1);
+            border: 1px solid rgba(192, 132, 252, 0.25);
+            font-size: 10px;
+            color: #c084fc;
+        }
+
+        /* Panel: Order / Promo */
+        .panel-order {
+            background: linear-gradient(160deg, #0a0f1a 0%, #0d1220 100%);
+            padding: 14px;
+            justify-content: space-between;
+        }
+
+        .price-tag {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(22px, 3vw, 38px);
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffbe0b, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .price-sub {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 2px;
+        }
+
+        .order-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff6b35, #ffbe0b);
+            border: none;
+            color: #000;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: clamp(11px, 1.2vw, 13px);
+            cursor: pointer;
+            letter-spacing: 0.06em;
+            transition: opacity .2s, transform .1s;
+            margin-top: 10px;
+        }
+
+        .order-btn:hover {
+            opacity: 0.85;
+            transform: scale(0.98);
+        }
+
+        /* Panel: Now Playing / Ambient */
+        .panel-ambient {
+            background: #050508;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.15;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: background 1s;
+            pointer-events: none;
+        }
+
+        .ambient-icon {
+            font-size: 36px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ambient-product {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(13px, 1.6vw, 18px);
+            font-weight: 700;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ambient-sub {
+            font-size: clamp(9px, 1vw, 11px);
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.06em;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ambient-pulse {
+            position: relative;
+            z-index: 1;
+            width: 40px;
+            height: 4px;
+            background: linear-gradient(90deg, #60a5fa, #c084fc);
+            border-radius: 2px;
+            margin: 4px auto 0;
+            animation: pulse-bar 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulse-bar {
+
+            0%,
+            100% {
+                transform: scaleX(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scaleX(0.5);
+                opacity: 0.5;
+            }
+        }
+
+        /* ============ SCREEN GLOW on selection ============ */
+        .screen.highlight-screen {
+            border-color: rgba(96, 165, 250, 0.5);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.15);
+        }
+
+        /* ============ LAYOUT LABEL ============ */
+        .layout-hint {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 0.05em;
+            pointer-events: none;
+        }
+
+        /* ============ SELECTION TOAST ============ */
+        #toast {
+            position: fixed;
+            bottom: 28px;
+            right: 24px;
+            background: rgba(15, 15, 25, 0.95);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #60a5fa;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .3s, transform .3s;
+            pointer-events: none;
+            z-index: 999;
+            backdrop-filter: blur(8px);
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============ SCROLLBAR ============ */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <span class="topbar-logo">OLIPOP</span>
+        <span class="topbar-title">🖥 6-Screen Store Simulator</span>
+        <div class="topbar-right">
+            <span class="badge badge-ipad">📱 iPad (Customer)</span>
+            <span class="badge badge-screen">🖥 5 Displays (Independent)</span>
+            <span class="topbar-help" title="คลิกเมนูใน iPad เพื่อเปลี่ยนสินค้า — จออื่นๆ จะอัพเดตแต่ละแผนกอิสระ">ℹ
+                คู่มือ</span>
+        </div>
+    </div>
+
+    <!-- SIMULATOR GRID -->
+    <div class="simulator-wrap">
+        <div class="screen-grid">
+
+            <!-- SCREEN 1: Main Video Display (top-left) -->
+            <div class="screen screen-slot-1" id="screen-video">
+                <span class="screen-label">📺 จอหลัก – วิดีโอสินค้า</span>
+                <div class="panel panel-video" id="panel-video">
+                    <!-- วิดีโอจริง -->
+                    <video id="main-video" muted playsinline loop></video>
+                    <!-- Spinner โหลด -->
+                    <div class="video-loader" id="video-loader"></div>
+                    <!-- Placeholder ก่อนเลือก -->
+                    <div class="video-placeholder" id="video-placeholder">
+                        <div class="ph-icon">▶</div>
+                        <div class="ph-text">เลือกสินค้าจาก iPad</div>
+                    </div>
+                    <!-- Text overlay ทับวิดีโอ -->
+                    <div class="video-overlay" id="video-overlay">
+                        <div class="video-product-name" id="vname"></div>
+                        <div class="video-product-sub" id="vsub"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 2: Nutrition Panel (mid-left) -->
+            <div class="screen screen-slot-2">
+                <span class="screen-label">🥗 จอโภชนาการ</span>
+                <div class="panel panel-nutrition" id="panel-nutrition">
+                    <div class="panel-header">
+                        <span class="panel-h" id="nut-name">เลือกสินค้า</span>
+                        <span class="panel-tag tag-green">Nutrition</span>
+                    </div>
+                    <div class="nutrition-rows" id="nutrition-rows">
+                        <div class="nut-row"><span class="nut-label">แคลอรี่</span><span class="nut-val">—</span></div>
+                        <div class="nut-row"><span class="nut-label">น้ำตาล</span><span class="nut-val">—</span></div>
+                        <div class="nut-row"><span class="nut-label">ใยอาหาร</span><span class="nut-val">—</span></div>
+                        <div class="nut-row"><span class="nut-label">โปรตีน</span><span class="nut-val">—</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 3: Ingredients Panel (bottom-left) -->
+            <div class="screen screen-slot-3">
+                <span class="screen-label">🌿 จอส่วนผสม</span>
+                <div class="panel panel-ingredients" id="panel-ingr">
+                    <div class="panel-header">
+                        <span class="panel-h" id="ingr-name">ส่วนผสม</span>
+                        <span class="panel-tag tag-orange">Ingredients</span>
+                    </div>
+                    <div class="ingr-chips" id="ingr-chips">
+                        <span class="ingr-chip" style="opacity:0.3">รอการเลือกสินค้า...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- iPAD: Customer Menu (center, full height) -->
+            <div class="screen screen-slot-ipad" id="screen-ipad">
+                <span class="screen-label">📱 iPad ลูกค้า</span>
+                <div class="ipad-outer">
+                    <div class="ipad-camera"></div>
+                    <div class="ipad-screen">
+                        <div class="panel" style="background:#0a0a12;">
+                            <div class="menu-header">
+                                <div class="menu-title">OLIPOP</div>
+                                <div class="menu-subtitle">เลือกเครื่องดื่มที่ต้องการ</div>
+                            </div>
+                            <div class="menu-list" id="menu-list">
+                                <!-- Generated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ipad-home"></div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4: Product Story (top-right) -->
+            <div class="screen screen-slot-4">
+                <span class="screen-label">📖 จอเรื่องราวสินค้า</span>
+                <div class="panel panel-desc" id="panel-desc">
+                    <div class="panel-header">
+                        <span class="panel-h" id="desc-name">Product Story</span>
+                        <span class="panel-tag tag-purple">Story</span>
+                    </div>
+                    <p class="panel-desc-text" id="desc-text">เลือกสินค้าจาก iPad เพื่อดูข้อมูลรายละเอียด</p>
+                    <div class="panel-product-badge" id="desc-badge" style="display:none">
+                        <span>✦</span><span id="desc-badge-text">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 5: Order / Price (mid-right) -->
+            <div class="screen screen-slot-5">
+                <span class="screen-label">🛒 จอสั่งซื้อ / ราคา</span>
+                <div class="panel panel-order" id="panel-order">
+                    <div>
+                        <div class="panel-header">
+                            <span class="panel-h" id="order-name">—</span>
+                            <span class="panel-tag tag-blue">Order</span>
+                        </div>
+                        <div class="price-tag" id="order-price">฿ —</div>
+                        <div class="price-sub">ราคาต่อขวด / รวมภาษี</div>
+                    </div>
+                    <button class="order-btn" id="order-btn" disabled>เลือกสินค้าก่อน</button>
+                </div>
+            </div>
+
+            <!-- SCREEN 6: Ambient / Now Showing (bottom-right) -->
+            <div class="screen screen-slot-6">
+                <span class="screen-label">✨ จอ Ambient</span>
+                <div class="panel panel-ambient" id="panel-ambient">
+                    <div class="ambient-glow" id="ambient-glow" style="background:#60a5fa;"></div>
+                    <div class="ambient-icon" id="ambient-icon">🥤</div>
+                    <div class="ambient-product" id="ambient-name">OLIPOP</div>
+                    <div class="ambient-sub" id="ambient-sub">กรุณาเลือกสินค้า</div>
+                    <div class="ambient-pulse"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast">✓ อัพเดตจอหลักแล้ว</div>
+
+    <div class="layout-hint">จำลองระบบ 6 จอ — จออื่นอัพเดตอิสระจาก iPad</div>
+
+    <script src="js/config.js"></script>
+    <script>
+        /* =========================================================
+           Product data (extends CONFIG from config.js)
+           videoSrc ใช้จาก config.js โดยตรง (ตรงกับไฟล์จริงใน video/)
+           ========================================================= */
+        const PRODUCTS = CONFIG.variants.map((v, i) => {
+            const icons = ['🍒', '🥭', '🍫', '🍦', '🍓', '🍵', '☕', '🍋', '🍑', '🫐'];
+            const prices = [89, 89, 129, 129, 99, 109, 119, 89, 99, 109];
+            const calories = [35, 40, 180, 175, 45, 55, 120, 30, 40, 50];
+            const sugars = ['3g', '4g', '8g', '6g', '5g', '3g', '2g', '0g', '4g', '5g'];
+            const fibers = ['9g', '9g', '2g', '2g', '8g', '6g', '1g', '10g', '7g', '8g'];
+            const proteins = ['0g', '0g', '30g', '28g', '1g', '2g', '2g', '0g', '0g', '1g'];
+            const glows = ['#ef4444', '#f59e0b', '#92400e', '#fef08a', '#ec4899', '#22c55e', '#78350f', '#eab308', '#f9a8d4', '#7c3aed'];
+            const ingredientMap = [
+                ['Cherry Juice', 'Prebiotics', 'Plant Fiber', 'Stevia', 'Citric Acid'],
+                ['Mango Puree', 'Prebiotics', 'Plant Fiber', 'Stevia', 'Natural Flavor'],
+                ['Cocoa', 'Whey Protein', 'Milk', 'Stevia', 'Vitamin D'],
+                ['Vanilla Extract', 'Whey Protein', 'Milk', 'Stevia', 'Calcium'],
+                ['Strawberry Puree', 'Prebiotics', 'Plant Fiber', 'Stevia', 'Vitamin C'],
+                ['Matcha Powder', 'Oat Milk', 'Honey', 'L-Theanine', 'Antioxidants'],
+                ['Cold Brew Coffee', 'Nitrogen', 'Oat Milk', 'MCT Oil', 'Magnesium'],
+                ['Lemon Juice', 'Electrolytes', 'Plant Fiber', 'Stevia', 'Zinc'],
+                ['White Tea', 'Peach Extract', 'Hyaluronic Acid', 'Collagen', 'Biotin'],
+                ['Blueberry', 'Acai', 'Elderberry', 'Vitamin C', 'Resveratrol'],
+            ];
+            return {
+                ...v,
+                // videoSrc มาจาก config.js (v.videoSrc) — ตรงกับชื่อไฟล์จริงใน video/
+                icon: icons[i] || '🥤',
+                price: prices[i] || 99,
+                calories: calories[i] || 40,
+                sugar: sugars[i] || '—',
+                fiber: fibers[i] || '—',
+                protein: proteins[i] || '—',
+                glowColor: glows[i] || '#60a5fa',
+                ingredients: ingredientMap[i] || ['Natural Flavor', 'Prebiotics', 'Plant Fiber'],
+            };
+        });
+
+        /* =========================================================
+           State
+           ========================================================= */
+        let selected = null;
+
+        /* =========================================================
+           Render Menu Items on iPad
+           ========================================================= */
+        function renderMenu() {
+            const list = document.getElementById('menu-list');
+            list.innerHTML = '';
+            PRODUCTS.forEach((p, i) => {
+                const item = document.createElement('div');
+                item.className = 'menu-item';
+                item.id = `menu-item-${i}`;
+                item.innerHTML = `
+        <div class="menu-item-icon" style="background:rgba(255,255,255,0.04)">${p.icon}</div>
+        <div class="menu-item-info">
+          <div class="menu-item-name">${p.name}</div>
+          <div class="menu-item-sub">${p.subtitle}</div>
+        </div>
+        <div class="menu-item-dot"></div>
+      `;
+                item.addEventListener('click', () => selectProduct(i));
+                list.appendChild(item);
+            });
+        }
+
+        /* =========================================================
+           Select Product → Update ALL Screens
+           ========================================================= */
+        function selectProduct(index) {
+            const p = PRODUCTS[index];
+            if (!p) return;
+            selected = index;
+
+            // Highlight menu item
+            document.querySelectorAll('.menu-item').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+
+            // ── Screen 1: Video / Main Display ──────────────────
+            const placeholder = document.getElementById('video-placeholder');
+            const loader = document.getElementById('video-loader');
+            const mainVideo = document.getElementById('main-video');
+
+            // อัพเดตชื่อสินค้า overlay
+            document.getElementById('vname').textContent = p.name.toUpperCase();
+            document.getElementById('vsub').textContent = p.subtitle;
+
+            if (p.videoSrc) {
+                // แสดง spinner, ซ่อน placeholder
+                placeholder.classList.add('hidden');
+                loader.classList.add('show');
+                mainVideo.classList.remove('ready');
+
+                // เปลี่ยน src และเล่น
+                mainVideo.src = p.videoSrc;
+                mainVideo.load();
+
+                // Fade-in เมื่อวิดีโอพร้อม
+                mainVideo.oncanplay = () => {
+                    loader.classList.remove('show');
+                    mainVideo.classList.add('ready');
+                    mainVideo.play().catch(() => { }); // autoplay policy
+                };
+                mainVideo.onerror = () => {
+                    // ถ้าโหลดไม่ได้ แสดง placeholder กลับ
+                    loader.classList.remove('show');
+                    placeholder.classList.remove('hidden');
+                };
+            } else {
+                // ไม่มีวิดีโอ → แสดง placeholder
+                placeholder.classList.remove('hidden');
+                mainVideo.src = '';
+                mainVideo.classList.remove('ready');
+            }
+
+            // ── Screen 2: Nutrition ──────────────────────────────
+            document.getElementById('nut-name').textContent = p.name;
+            const nutRows = document.getElementById('nutrition-rows');
+            nutRows.innerHTML = `
+      <div class="nut-row"><span class="nut-label">แคลอรี่</span><span class="nut-val">${p.calories} kcal</span></div>
+      <div class="nut-row"><span class="nut-label">น้ำตาล</span><span class="nut-val">${p.sugar}</span></div>
+      <div class="nut-row"><span class="nut-label">ใยอาหาร</span><span class="nut-val">${p.fiber}</span></div>
+      <div class="nut-row"><span class="nut-label">โปรตีน</span><span class="nut-val">${p.protein}</span></div>
+    `;
+
+            // ── Screen 3: Ingredients ────────────────────────────
+            document.getElementById('ingr-name').textContent = `ส่วนผสม: ${p.name}`;
+            const chips = document.getElementById('ingr-chips');
+            chips.innerHTML = p.ingredients.map((ing, i) =>
+                `<span class="ingr-chip ${i === 0 ? 'highlight' : ''}">${ing}</span>`
+            ).join('');
+
+            // ── Screen 4: Description ────────────────────────────
+            document.getElementById('desc-name').textContent = p.name;
+            document.getElementById('desc-text').textContent = p.description;
+            const badge = document.getElementById('desc-badge');
+            badge.style.display = 'inline-flex';
+            document.getElementById('desc-badge-text').textContent = `${p.icon} ${p.subtitle}`;
+
+            // ── Screen 5: Order ──────────────────────────────────
+            document.getElementById('order-name').textContent = p.name;
+            document.getElementById('order-price').textContent = `฿ ${p.price}`;
+            const btn = document.getElementById('order-btn');
+            btn.disabled = false;
+            btn.textContent = `🛒 สั่ง ${p.name}`;
+
+            // ── Screen 6: Ambient ────────────────────────────────
+            document.getElementById('ambient-icon').textContent = p.icon;
+            document.getElementById('ambient-name').textContent = p.name.toUpperCase();
+            document.getElementById('ambient-sub').textContent = p.subtitle;
+            document.getElementById('ambient-glow').style.background = p.glowColor;
+
+            // Show toast
+            showToast(`✓ เลือก "${p.name}" — อัพเดต 5 จอแล้ว`);
+        }
+
+        /* =========================================================
+           Toast
+           ========================================================= */
+        let toastTimer;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
+        /* =========================================================
+           Init
+           ========================================================= */
+        renderMenu();
+
+        // Auto-select first product after short delay
+        setTimeout(() => selectProduct(0), 600);
+    </script>
+</body>
+
+</html>

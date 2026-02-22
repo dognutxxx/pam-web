@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OLIPOP – Order Display</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: #06080f;
+            color: #f0f0f0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            transition: background 1s ease;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 100% 0%, var(--glow, rgba(251, 146, 60, 0.15)) 0%, transparent 60%);
+            opacity: 0.4;
+            pointer-events: none;
+            transition: background 1s ease;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── HEADER ── */
+        .screen-header {
+            padding: 20px 28px 14px;
+            background: linear-gradient(160deg, #0a0f1e 0%, #06080f 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .screen-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        .screen-badge {
+            font-size: 10px;
+            padding: 3px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(251, 146, 60, 0.35);
+            color: #fb923c;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* WAITING */
+        #waiting {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            opacity: 0.35;
+            transition: opacity .4s;
+        }
+
+        #waiting.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: none;
+        }
+
+        .w-icon {
+            font-size: 44px;
+        }
+
+        .w-text {
+            font-size: 13px;
+            letter-spacing: 0.06em;
+        }
+
+        .w-pulse {
+            width: 40px;
+            height: 3px;
+            background: linear-gradient(90deg, #fb923c, #ffbe0b);
+            border-radius: 2px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scaleX(1)
+            }
+
+            50% {
+                transform: scaleX(.4)
+            }
+        }
+
+        /* PRODUCT PANEL */
+        #product-panel {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity .4s;
+        }
+
+        #product-panel.visible {
+            opacity: 1;
+        }
+
+        /* Hero Product Area */
+        .hero-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            pointer-events: none;
+            transition: background 1s;
+            z-index: 0;
+        }
+
+        .hero-icon {
+            font-size: clamp(60px, 15vw, 120px);
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+            animation: float 4s ease-in-out infinite;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg)
+            }
+
+            50% {
+                transform: translateY(-15px) rotate(5deg)
+            }
+        }
+
+        .hero-name {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(26px, 5vw, 50px);
+            font-weight: 800;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+            line-height: 1;
+        }
+
+        .hero-sub {
+            font-size: clamp(11px, 1.5vw, 14px);
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Price */
+        .price-section {
+            padding: 20px 28px 0;
+            text-align: center;
+        }
+
+        .price-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .price-tag {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(48px, 12vw, 96px);
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #ffbe0b 0%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .price-note {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.25);
+            margin-top: 4px;
+        }
+
+        /* CTA Button */
+        .cta-section {
+            padding: 20px 28px 28px;
+        }
+
+        .cta-btn {
+            display: block;
+            width: 100%;
+            padding: clamp(14px, 2.5vw, 20px);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff6b35, #ffbe0b);
+            border: none;
+            color: #000;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: clamp(14px, 2vw, 18px);
+            cursor: pointer;
+            letter-spacing: 0.06em;
+            transition: all .2s;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.25);
+        }
+
+        .cta-btn:hover {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .cta-btn:active {
+            transform: scale(0.96);
+        }
+
+        .cta-btn:disabled {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.2);
+            cursor: default;
+            box-shadow: none;
+        }
+
+        /* FOOTER */
+        .footer {
+            padding: 10px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.15);
+            text-align: center;
+            letter-spacing: 0.05em;
+            flex-shrink: 0;
+        }
+
+        /* CONFIRMED OVERLAY */
+        #confirmed {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+
+        #confirmed.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .confirmed-check {
+            font-size: 60px;
+        }
+
+        .confirmed-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 800;
+            color: #4ade80;
+        }
+
+        .confirmed-sub {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="screen-header">
+        <span class="screen-logo">OLIPOP</span>
+        <span class="screen-badge">🛒 Order & Price</span>
+    </div>
+
+    <div class="main">
+        <!-- Waiting -->
+        <div id="waiting">
+            <div class="w-icon">🛒</div>
+            <div class="w-text">รอการเลือกสินค้าจาก iPad</div>
+            <div class="w-pulse"></div>
+        </div>
+
+        <!-- Product Panel -->
+        <div id="product-panel">
+            <div class="hero-area">
+                <div class="hero-glow" id="hero-glow"></div>
+                <div class="hero-icon" id="h-icon">🥤</div>
+                <div class="hero-name" id="h-name">—</div>
+                <div class="hero-sub" id="h-sub">—</div>
+            </div>
+
+            <div class="price-section">
+                <div class="price-label">ราคาต่อขวด</div>
+                <div class="price-tag" id="h-price">฿ —</div>
+                <div class="price-note">รวมภาษีมูลค่าเพิ่ม</div>
+            </div>
+
+            <div class="cta-section">
+                <button class="cta-btn" id="cta-btn" onclick="confirmOrder()">
+                    🛒 สั่งซื้อเลย
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">🛒 Order Screen — OLIPOP Multi-Display</div>
+
+    <!-- Confirmed Overlay -->
+    <div id="confirmed">
+        <div class="confirmed-check">✅</div>
+        <div class="confirmed-text" id="confirmed-text">รับออเดอร์แล้ว!</div>
+        <div class="confirmed-sub" id="confirmed-sub">กำลังเตรียมสินค้าให้...</div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="channel.js"></script>
+    <script>
+        let currentProduct = null;
+
+        function showProduct(p) {
+            currentProduct = p;
+
+            // Update color theme
+            const glow = p.glowColor || '#60a5fa';
+            document.body.style.setProperty('--glow', glow + '22');
+
+            // Hide waiting, show panel
+            document.getElementById('waiting').classList.add('hidden');
+            const panel = document.getElementById('product-panel');
+            panel.style.display = 'flex';
+            panel.style.flexDirection = 'column';
+
+            // Reset & Trigger anim
+            panel.classList.remove('visible');
+            void panel.offsetWidth; // Trigger reflow
+            panel.classList.add('visible');
+
+            // Fill data
+            document.getElementById('h-icon').textContent = p.icon || '🥤';
+            document.getElementById('h-name').textContent = p.name;
+            document.getElementById('h-sub').textContent = p.subtitle;
+            document.getElementById('h-price').textContent = `฿ ${p.price}`;
+            document.getElementById('hero-glow').style.background = glow;
+
+            const btn = document.getElementById('cta-btn');
+            btn.disabled = false;
+            btn.textContent = `🛒 สั่ง ${p.name}`;
+        }
+
+        function confirmOrder() {
+            if (!currentProduct) return;
+            const overlay = document.getElementById('confirmed');
+            document.getElementById('confirmed-text').textContent = `✓ รับออเดอร์: ${currentProduct.name}`;
+            document.getElementById('confirmed-sub').textContent = `฿${currentProduct.price} — กำลังเตรียม...`;
+            overlay.classList.add('show');
+            setTimeout(() => overlay.classList.remove('show'), 3000);
+        }
+
+        onProductSelect(showProduct);
+    </script>
+</body>
+
+</html>
